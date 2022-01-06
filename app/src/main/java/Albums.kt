@@ -1,1 +1,0 @@
-class Albums : ArrayList<AlbumsItem>()

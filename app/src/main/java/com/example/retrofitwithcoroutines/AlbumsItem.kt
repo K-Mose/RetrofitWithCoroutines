@@ -1,3 +1,5 @@
+package com.example.retrofitwithcoroutines
+
 import com.google.gson.annotations.SerializedName
 
 // add plugin 'JSON to Kotlin class'

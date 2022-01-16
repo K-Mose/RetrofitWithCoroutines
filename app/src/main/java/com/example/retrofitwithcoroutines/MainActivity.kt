@@ -3,6 +3,7 @@ package com.example.retrofitwithcoroutines
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.liveData
@@ -16,10 +17,23 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         val retService = RetrofitInstance.getRetrofitInstance().create(AlbumService::class.java)
+
+        // path parameter example
+        val pathResponse : LiveData<Response<AlbumsItem>> = liveData {
+            val response = retService.getAblum(3)
+            emit(response)
+        }
+
+        pathResponse.observe(this, Observer {
+            val title = it.body()?.title
+            Toast.makeText(this, title, Toast.LENGTH_LONG).show()
+        })
+
         val responseLiveData: LiveData<Response<Albums>> = liveData {
             val response = retService.getSortedAlbums(3)//getAlbums()
             emit(response)
         }
+
         responseLiveData.observe(this, Observer {
             val albumsList = it.body()?.listIterator()
             if(albumsList != null) {

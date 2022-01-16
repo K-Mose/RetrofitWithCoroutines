@@ -11,14 +11,39 @@ import com.example.retrofitwithcoroutines.databinding.ActivityMainBinding
 import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var retService: AlbumService
     lateinit var binding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        val retService = RetrofitInstance.getRetrofitInstance().create(AlbumService::class.java)
+        retService = RetrofitInstance.getRetrofitInstance().create(AlbumService::class.java)
+//        getRequestWithPathParameters()
+        getRequestWithQueryParameters()
 
-        // path parameter example
+    }
+
+    private fun getRequestWithQueryParameters() {
+        val responseLiveData: LiveData<Response<Albums>> = liveData {
+            val response = retService.getSortedAlbums(3)//getAlbums()
+            emit(response)
+        }
+        responseLiveData.observe(this, Observer {
+            val albumsList = it.body()?.listIterator()
+            if(albumsList != null) {
+                while (albumsList.hasNext()) {
+                    val albumsItem = albumsList.next()
+                    val text = "  " + "Album Title : ${albumsItem.title} \n"+
+                            "  " + "Album Id : ${albumsItem.id} \n"+
+                            "  " + "Album UserId : ${albumsItem.userId} \n\n\n"
+                    Log.i("TAG :: ", "$text")
+                    binding.tvText.append(text)
+                }
+            }
+        })
+    }
+
+    private fun getRequestWithPathParameters() {
         val pathResponse : LiveData<Response<AlbumsItem>> = liveData {
             val response = retService.getAblum(3)
             emit(response)
@@ -28,25 +53,5 @@ class MainActivity : AppCompatActivity() {
             val title = it.body()?.title
             Toast.makeText(this, title, Toast.LENGTH_LONG).show()
         })
-
-        val responseLiveData: LiveData<Response<Albums>> = liveData {
-            val response = retService.getSortedAlbums(3)//getAlbums()
-            emit(response)
-        }
-
-        responseLiveData.observe(this, Observer {
-            val albumsList = it.body()?.listIterator()
-            if(albumsList != null) {
-                while (albumsList.hasNext()) {
-                    val albumsItem = albumsList.next()
-                    val text = "  " + "Album Title : ${albumsItem.title} \n"+
-                               "  " + "Album Id : ${albumsItem.id} \n"+
-                               "  " + "Album UserId : ${albumsItem.userId} \n\n\n"
-                    Log.i("TAG :: ", "$text")
-                    binding.tvText.append(text)
-                }
-            }
-        })
-
     }
 }

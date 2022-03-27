@@ -71,7 +71,69 @@ Kotlin은 다양한 고수준의 coroutine-enabled primitives와 함께 <a href=
 
 코틀린에서 일반적인 코루틴 사용법을 알고싶다면 <a href="https://github.com/K-Mose/Kotlin_Again/tree/master/src/doIt/chapter11">여기</a>를 눌러주세요.
 
+## Structure 
+```
+RetrofitWithCoroutines
+├─ app
+│  └─ src
+│     ├─ main
+│     │  ├─ AndroidManifest.xml
+│     │  ├─ java
+│     │  │  └─ com
+│     │  │     └─ example
+│     │  │        └─ retrofitwithcoroutines
+│     │  │           ├─ Albums.kt
+│     │  │           ├─ AlbumService.kt
+│     │  │           ├─ AlbumsItem.kt
+│     │  │           ├─ MainActivity.kt
+│     │  │           └─ RetrofitInstance.kt
+```
+앱의 구조는 상당히 간단합니다. Open API인 https://jsonplaceholder.typicode.com/albums의 데이터를 코틀린에서 사용하기 위해 만든 데이터클래스 AlbumsItem.kt와 AlbumsItem을 리스트화 시키기위한 클래스 Albums.kt, Retrofit 어노테이션을 통해서 종단점을 설정하는 AlbumService.kt interface, Retrofit 인스턴스를 싱글톤으로 생성시키고 반환시키는 RetrofitInstance.kt 그리고 시나리오별로 함수를 실행시킬 MainActivity.kt 입니다. 
 
+### AlbumItem과 Albums 
+data class는 'JSON to Kotlin class'라는 plugin을 사용하면 쉽게 만들 수 있습니다. 
+```
+data class AlbumsItem(
+    @SerializedName("id")
+    val id: Int,
+    @SerializedName("title")
+    val title: String,
+    @SerializedName("userId")
+    val userId: Int
+)
+
+class Albums : ArrayList<AlbumsItem>()
+```
+Albums는 단순히 통신을 통해 AlbumItem이 리스트 형태로 왔을 때 받을 수 있게 만들었습니다. 
+
+### Interface With Url End Potins 
+```
+interface AlbumService {
+
+    @GET("/albums")
+    suspend fun getAlbums() : Response<Albums>
+    
+    @GET("/albums")
+    suspend fun getSortedAlbums(@Query("userId") userId: Int) : Response<Albums>
+
+    @GET("/albums/{id}")
+    suspend fun getAblum(@Path(value = "id")albumId:Int) : Response<AlbumsItem>
+
+    @POST("/albums")
+    suspend fun uploadAlbum(@Body album: AlbumsItem) : Response<AlbumsItem>
+}
+```
+각 어노테이션 안에 URL 종단점을 작성하고 코루틴과 병행하기 위해 suspend 함수로 작성합니다. 
+각 함수의 반환 타입은 Http의 응답데이터가 담겨있는 Retrofit2의 Response객체 입니다. <br>
+JSONPlaceholder 가이드는 <a href="https://jsonplaceholder.typicode.com/guide/">여기</a>를 참고하세요.
+
+### Retrofit Instance Class
+```
+class RetrofitInstance {
+    companion object {
+    
+```
+인스턴스 생성 객체는 Singletone으로 사용하기 위해 <a href="https://github.com/K-Mose/Kotlin_Again/blob/master/src/doIt/chapter06/section3/ObjectDeclarationExpression.kt">companion object</a>를 사용합니다. 
 
 ## Ref.
 https://square.github.io/retrofit/
@@ -80,3 +142,4 @@ https://github.com/google/gson
 https://guides.codepath.com/android/consuming-apis-with-retrofit
 https://kotlinlang.org/docs/multiplatform-mobile-concurrency-and-coroutines.html#frozen-returned-data
 https://kotlinlang.org/docs/coroutine-context-and-dispatchers.html#dispatchers-and-threads
+https://jsonplaceholder.typicode.com/

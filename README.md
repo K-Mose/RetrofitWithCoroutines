@@ -90,7 +90,7 @@ RetrofitWithCoroutines
 ```
 앱의 구조는 상당히 간단합니다. Open API인 https://jsonplaceholder.typicode.com/albums의 데이터를 코틀린에서 사용하기 위해 만든 데이터클래스 AlbumsItem.kt와 AlbumsItem을 리스트화 시키기위한 클래스 Albums.kt, Retrofit 어노테이션을 통해서 종단점을 설정하는 AlbumService.kt interface, Retrofit 인스턴스를 싱글톤으로 생성시키고 반환시키는 RetrofitInstance.kt 그리고 시나리오별로 함수를 실행시킬 MainActivity.kt 입니다. 
 
-### AlbumItem과 Albums 
+### AlbumItem & Albums 
 data class는 'JSON to Kotlin class'라는 plugin을 사용하면 쉽게 만들 수 있습니다. 
 ```
 data class AlbumsItem(
@@ -125,15 +125,56 @@ interface AlbumService {
 ```
 각 어노테이션 안에 URL 종단점을 작성하고 코루틴과 병행하기 위해 suspend 함수로 작성합니다. 
 각 함수의 반환 타입은 Http의 응답데이터가 담겨있는 Retrofit2의 Response객체 입니다. <br>
-JSONPlaceholder 가이드는 <a href="https://jsonplaceholder.typicode.com/guide/">여기</a>를 참고하세요.
+JSONPlaceholder 가이드 는 <a href="https://jsonplaceholder.typicode.com/guide/">여기</a>를 참고하세요.
 
 ### Retrofit Instance Class
 ```
 class RetrofitInstance {
     companion object {
     
+        val interceptor = HttpLoggingInterceptor().apply {
+            this.level = HttpLoggingInterceptor.Level.BODY
+        }
+        
+        val client = OkHttpClient.Builder().apply {
+            this.addInterceptor(interceptor)
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(20, TimeUnit.SECONDS)
+                .writeTimeout(25, TimeUnit.SECONDS)
+        }.build()    
+        
+        fun getRetrofitInstance(): Retrofit {
+            return Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create(GsonBuilder().create()))
+                .build()
+        }    
+    }
+}        
 ```
 인스턴스 생성 객체는 Singletone으로 사용하기 위해 <a href="https://github.com/K-Mose/Kotlin_Again/blob/master/src/doIt/chapter06/section3/ObjectDeclarationExpression.kt">companion object</a>를 사용합니다. 
+우선 네트워크 통신의 로깅을 위해 <a href="https://github.com/square/okhttp/tree/master/okhttp-logging-interceptor#logging-interceptor">HttpLoggingInterceptor</a>를 설정합니다. 
+##### HttpLoggingInterceptor <br>
+Retrofit은 네트워크 통신을위해 OkHttp를 사용합니다. HttpLoggingInterceptor는 OkHttp의 라이브러리로, 현재 앱 내에서 네트워크의 동작 로그를 보여줍니다. 이것은 네트워크 통신을 이해하는데 아주 유용하고 코드가 정상작동하지 않을 때 문제를 찾도록 도와줍니다.  
+HttpLoggingInterceptor내에서 로그 레벨을 성정하여 어떻게 로그를 표출할지 설정할 수 있습니다. 
+   * Basic - Log request and response lines only
+   * Body - Logs request and response line amd their respective headers and bodies of the network operation.
+   * Header - Logs request and response lines and their respective headers
+로그 설정이 완료되었으면 클라이언트의 `addInterceptor()`함수로 application interceptor를 등록합니다. <br>
+Interceptor에 대해 더 알고싶다면 <a href="https://square.github.io/okhttp/features/interceptors/#interceptors">여기</a>를 클릭하세요.
+
+네트워크 통신이 테스트 기기(혹은 지역에 따라서) 네트워크 통신의 속도와 상태가 다를 수 있기 때문에 Retrofit에 network Timeout을 설정합니다. Client의 builder 안에서 Timeout 함수를 설정합니다. 
+  * connectTimeout - 앱이 서버와의 연결 타임아웃 설정 (Retrofit의 기본 설정 시간은 10초)
+  * readTimeout - 2개의 데이터 패킷이 도착하는데 걸리는 최대 시간 차 설정
+  * writeTimeout - 2개의 데이터 패킷을 서버에 보내는데 걸리는 최대 시간차 설정
+
+Timeout 설정은 인터넷 속도, 서버의 성능 그리고 앱이 설치 될 기기에 성능에 따라 고려해서 설정해야 합니다. 
+
+
+
+
+   
 
 ## Ref.
 https://square.github.io/retrofit/
@@ -143,3 +184,4 @@ https://guides.codepath.com/android/consuming-apis-with-retrofit
 https://kotlinlang.org/docs/multiplatform-mobile-concurrency-and-coroutines.html#frozen-returned-data
 https://kotlinlang.org/docs/coroutine-context-and-dispatchers.html#dispatchers-and-threads
 https://jsonplaceholder.typicode.com/
+https://square.github.io/okhttp/features/interceptors/

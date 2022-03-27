@@ -92,7 +92,7 @@ RetrofitWithCoroutines
 
 ### AlbumItem & Albums 
 data class는 'JSON to Kotlin class'라는 plugin을 사용하면 쉽게 만들 수 있습니다. 
-```
+```kotlin
 data class AlbumsItem(
     @SerializedName("id")
     val id: Int,
@@ -107,7 +107,7 @@ class Albums : ArrayList<AlbumsItem>()
 Albums는 단순히 통신을 통해 AlbumItem이 리스트 형태로 왔을 때 받을 수 있게 만들었습니다. 
 
 ### Interface With Url End Potins 
-```
+```kotlin
 interface AlbumService {
 
     @GET("/albums")
@@ -128,7 +128,7 @@ interface AlbumService {
 JSONPlaceholder 가이드 는 <a href="https://jsonplaceholder.typicode.com/guide/">여기</a>를 참고하세요.
 
 ### Retrofit Instance Class
-```
+```kotlin
 class RetrofitInstance {
     companion object {
     
@@ -172,6 +172,34 @@ Interceptor에 대해 더 알고싶다면 <a href="https://square.github.io/okht
 Timeout 설정은 인터넷 속도, 서버의 성능 그리고 앱이 설치 될 기기에 성능에 따라 고려해서 설정해야 합니다. 
 
 
+### Create Insatnace
+```kotlin
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        …
+        // 인스턴스 생성 
+        var retService = RetrofitInstance.getRetrofitInstance().create(AlbumService::class.java)
+        // 통신
+        val responseLiveData: LiveData<Response<Albums>> = liveData {
+            val response = retService.getAlbums()
+            emit(response)
+        }
+        responseLiveData.observe(this) {
+            val albumList = it.body()?.listIterator()
+            if (albumList != null) {
+                while (albumList.hasNext()) {
+                    val albumItem = albumList.next()
+                    Log.i("MyTag", "${albumItem.id} : ${albumItem.title} / ${albumItem.userId}")
+                }
+            }
+        }        
+    }
+}    
+```
+인스턴스를 호출하기 위해 [Retrofit Instance Class](#retrofit-instance-class)에서 Singletone으로 생성했던 getRetrofitInstance() 메소드를 호출하고, 호출된 builder에서 API end-point interface를 구현하기 위해 <a href="https://square.github.io/retrofit/2.x/retrofit/retrofit2/Retrofit.html#create-java.lang.Class-">`create()`</a> 함수 안에 작성한 [Service interface](#interface-with-url-end-potins)를 인자로 넘긴 후 인스턴스를 받습니다. 
+
+[interface](#interface-with-url-end-potins)에 작성된 suspend 함수들이 Coroutine과 함께하기 위해 LiveData를 CoroutineLiveData 객체로 초기화 시킵니다. 
+초기화된 livedata 내의 `reService.getAlbums()` 함수에서 네트워크 _GET Request_ 요청을 하고 요청 받은 _Response_ 를 `emit(response)` 하면 `responseLiveData`의 Oberser가 이를 감지하여 `Log.i("MyTag", "…")`로 출력합니다. 
 
 
    

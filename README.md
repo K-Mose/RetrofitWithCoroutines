@@ -201,15 +201,42 @@ class MainActivity : AppCompatActivity() {
 [interface](#interface-with-url-end-potins)에 작성된 suspend 함수들이 Coroutine과 함께하기 위해 LiveData를 CoroutineLiveData 객체로 초기화 시킵니다. 
 초기화된 livedata 내의 `reService.getAlbums()` 함수에서 네트워크 _GET Request_ 요청을 하고 요청 받은 _Response_ 를 `emit(response)` 하면 `responseLiveData`의 Oberser가 이를 감지하여 `Log.i("MyTag", "…")`로 출력합니다. 
 
-
+PathVariable, QueryParameter 및 Post의 활용은 <a href="https://github.com/K-Mose/RetrofitWithCoroutines/blob/master/app/src/main/java/com/example/retrofitwithcoroutines/MainActivity.kt">MainActivity.kt</a>를 참고하세요
    
+## Result
+Response Log|
+-----|
+<img src="https://user-images.githubusercontent.com/55622345/160280154-166fd334-e422-45fb-90fd-07e5e333ad1f.PNG" width="700px">|
+<br>
+
+HttpLoggingInterceptor | 
+-----|
+<img src="https://user-images.githubusercontent.com/55622345/160280210-943e5c08-98f0-4517-9982-d825052c4873.PNG" width="700px">|
+<img src="https://user-images.githubusercontent.com/55622345/160280261-40bc024e-5265-49b5-b920-c67596a0ac31.PNG" width="700px">|
+
+
+## Dependency
+Retrofit -
+* com.squareup.retrofit2:retrofit:2.9.0
+* com.squareup.retrofit2:converter-gson:2.9.0
+* com.squareup.okhttp3:logging-interceptor:4.9.3
+
+Coroutine -
+* org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0
+* org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0   
+
+Lifecycle : ViewModel&Livedata - 
+* androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0
+* androidx.lifecycle:lifecycle-livedata-ktx:2.4.0
+* androidx.lifecycle:lifecycle-compiler:2.4.0 
 
 ## Ref.
-https://square.github.io/retrofit/
-https://square.github.io/okhttp/
-https://github.com/google/gson
-https://guides.codepath.com/android/consuming-apis-with-retrofit
-https://kotlinlang.org/docs/multiplatform-mobile-concurrency-and-coroutines.html#frozen-returned-data
-https://kotlinlang.org/docs/coroutine-context-and-dispatchers.html#dispatchers-and-threads
-https://jsonplaceholder.typicode.com/
-https://square.github.io/okhttp/features/interceptors/
+https://square.github.io/retrofit/ <br/>
+https://square.github.io/okhttp/ <br/>
+https://github.com/google/gson <br/>
+https://guides.codepath.com/android/consuming-apis-with-retrofit <br/>
+https://kotlinlang.org/docs/multiplatform-mobile-concurrency-and-coroutines.html#frozen-returned-data <br/>
+https://kotlinlang.org/docs/coroutine-context-and-dispatchers.html#dispatchers-and-threads <br/>
+https://jsonplaceholder.typicode.com/ <br/>
+https://square.github.io/okhttp/features/interceptors/ <br/>
+
